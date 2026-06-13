@@ -1,0 +1,15 @@
+[module]
+id = "vault_janitor"
+name = "Vault Janitor"
+version = "0.1.0"
+description = "Scans the vault for dead links, orphan docs, and missing frontmatter; reports findings"
+kind = "automation"
+timeout_seconds = 60
+
+[module.triggers]
+supported = ["schedule", "manual"]
+default = { type = "schedule", cron = "0 6 * * 1" }
+
+[module.context]
+read = []     # whole vault, read-only (no write scope)
+write = []

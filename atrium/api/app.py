@@ -9,6 +9,7 @@ from atrium import __version__, db
 from atrium.api import context as context_api
 from atrium.api import hooks as hooks_api
 from atrium.api import modules as modules_api
+from atrium.api import reports as reports_api
 from atrium.api import triggers as triggers_api
 from atrium.config import Settings, get_settings
 from atrium.context.embeddings import get_provider
@@ -39,20 +40,28 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         await app.state.indexer.full_scan()
         if settings.watch_vault:
             app.state.indexer.start_watcher()
+        # .env-sourced key must reach the process env for the anthropic SDK
+        if settings.anthropic_api_key and not os.environ.get("ANTHROPIC_API_KEY"):
+            os.environ["ANTHROPIC_API_KEY"] = settings.anthropic_api_key
+        anthropic_configured = bool(
+            settings.anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
+        )
         app.state.librarian = Librarian(
             app.state.db,
             app.state.indexer,
             embeddings,
             router_model=settings.router_model,
-            anthropic_configured=bool(
-                settings.anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
-            ),
+            anthropic_configured=anthropic_configured,
         )
 
         app.state.registry = ModuleRegistry(settings.modules_path)
         app.state.registry.scan()
         app.state.runner = ModuleRunner(
-            app.state.db, app.state.registry, librarian=app.state.librarian
+            app.state.db,
+            app.state.registry,
+            librarian=app.state.librarian,
+            llm_model=settings.llm_model,
+            anthropic_configured=anthropic_configured,
         )
         app.state.triggers = TriggerEngine(app.state.db, app.state.registry, app.state.runner)
         await app.state.triggers.start()
@@ -74,6 +83,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(triggers_api.router)
     app.include_router(hooks_api.router)
     app.include_router(context_api.router)
+    app.include_router(reports_api.router)
 
     @app.get("/api/health")
     async def health() -> dict:

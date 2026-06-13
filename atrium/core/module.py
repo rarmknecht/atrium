@@ -99,6 +99,7 @@ class ModuleContext:
         db: aiosqlite.Connection,
         logger: logging.Logger,
         librarian=None,
+        llm=None,
     ):
         self.module_id = module_id
         self.run_id = run_id
@@ -108,6 +109,7 @@ class ModuleContext:
         self.report = Reporter(db, module_id, run_id)
         self.state = KVStore(db, module_id)
         self._librarian = librarian
+        self._llm = llm
 
     @property
     def librarian(self):  # noqa: ANN201 — ScopedLibrarian (avoids platform import cycle)
@@ -116,8 +118,10 @@ class ModuleContext:
         return self._librarian
 
     @property
-    def llm(self):  # noqa: ANN201 — LLMService lands in Phase 4
-        raise NotImplementedError("The LLM service arrives in Phase 4")
+    def llm(self):  # noqa: ANN201 — LLMService
+        if self._llm is None:
+            raise RuntimeError("LLM service not available in this run")
+        return self._llm
 
 
 class Module(ABC):

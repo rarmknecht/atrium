@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,11 +19,12 @@ class Settings(BaseSettings):
     embeddings_provider: str = "fastembed"  # "fastembed" | "off"
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     router_model: str = "claude-opus-4-8"
+    llm_model: str = "claude-opus-4-8"      # default for ctx.llm; modules may override per call
     watch_vault: bool = True
 
-    # Read by the anthropic SDK directly via ANTHROPIC_API_KEY; tracked here only
-    # so the UI can report whether it is configured.
-    anthropic_api_key: str | None = None
+    # Unprefixed on purpose (the SDK convention); read from env or .env. The app
+    # exports it to the process env at startup so the anthropic SDK finds it.
+    anthropic_api_key: str | None = Field(default=None, validation_alias="ANTHROPIC_API_KEY")
 
     @property
     def db_path(self) -> Path:

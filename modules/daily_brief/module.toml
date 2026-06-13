@@ -1,0 +1,15 @@
+[module]
+id = "daily_brief"
+name = "Daily Brief"
+version = "0.1.0"
+description = "Personalized morning brief, grounded in the context vault via the librarian"
+kind = "agent"
+timeout_seconds = 240
+
+[module.triggers]
+supported = ["schedule", "manual"]
+default = { type = "schedule", cron = "0 7 * * *" }
+
+[module.context]
+read = []                      # empty = whole vault
+write = ["logs/briefs/"]

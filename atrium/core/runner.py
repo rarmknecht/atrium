@@ -34,10 +34,19 @@ class ConfigError(ValueError):
 
 
 class ModuleRunner:
-    def __init__(self, db: aiosqlite.Connection, registry: ModuleRegistry, librarian=None):
+    def __init__(
+        self,
+        db: aiosqlite.Connection,
+        registry: ModuleRegistry,
+        librarian=None,
+        llm_model: str = "claude-opus-4-8",
+        anthropic_configured: bool = False,
+    ):
         self._db = db
         self._registry = registry
         self._librarian = librarian  # context-layer Librarian; scoped per module run
+        self._llm_model = llm_model
+        self._anthropic_configured = anthropic_configured
         self._locks: dict[str, asyncio.Lock] = {}
 
     def _lock(self, module_id: str) -> asyncio.Lock:
@@ -125,6 +134,10 @@ class ModuleRunner:
         run_logger.setLevel(logging.DEBUG)
         run_logger.addHandler(buffer)
 
+        from atrium.llm.service import LLMService
+
+        llm = LLMService(self._llm_model, configured=self._anthropic_configured)
+
         started = time.monotonic()
         result: RunResult
         try:
@@ -145,6 +158,7 @@ class ModuleRunner:
                 db=self._db,
                 logger=run_logger,
                 librarian=librarian,
+                llm=llm,
             )
             assert record.instance is not None
             module = record.instance
@@ -180,6 +194,7 @@ class ModuleRunner:
         duration_ms = int((time.monotonic() - started) * 1000)
         await self._db.execute(
             """UPDATE runs SET status = ?, summary = ?, data_json = ?, logs = ?,
+                   tokens_in = ?, tokens_out = ?,
                    finished_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), duration_ms = ?
                WHERE id = ?""",
             (
@@ -187,6 +202,8 @@ class ModuleRunner:
                 result.summary,
                 json.dumps(result.data) if result.data is not None else None,
                 "\n".join(buffer.lines),
+                llm.usage.tokens_in,
+                llm.usage.tokens_out,
                 duration_ms,
                 run_id,
             ),

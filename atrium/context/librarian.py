@@ -322,6 +322,10 @@ class ScopedLibrarian:
     async def ask(self, query: str, k: int = 5) -> list[SearchHit]:
         return await self._librarian.ask(query, k=k, scope=self._read)
 
+    async def list_docs(self) -> list[ContextDoc]:
+        docs = await self._librarian.list_docs()
+        return [d for d in docs if _scope_ok(d.path, self._read)]
+
     async def route(self, task: str, k: int = 4) -> ContextBundle:
         return await self._librarian.route(task, k=k, scope=self._read)
 
