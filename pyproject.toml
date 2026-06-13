@@ -3,6 +3,9 @@ name = "atrium"
 version = "0.1.0"
 description = "A personal platform for custom agents and automations with a unified context layer"
 readme = "README.md"
+license = "MIT-0"
+license-files = ["LICENSE"]
+authors = [{ name = "Randy Armknecht", email = "rarmknecht@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",

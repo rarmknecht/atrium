@@ -73,3 +73,7 @@ Settings use the `ATRIUM_` env prefix (or `.env`). Common ones:
   serves relevant docs to modules; all indexes are derived and rebuildable.
 - **Stack**: Python 3.12 + FastAPI + APScheduler + SQLite (uv-managed); Anthropic SDK
   for agent modules; React + Vite + TypeScript UI; Docker for the always-on host.
+
+## License
+
+[MIT-0](LICENSE) (MIT No Attribution) — do anything you like; no attribution required.
