@@ -65,7 +65,10 @@ async def client(tmp_path):
     _write_module(modules, "broken_import", BROKEN_IMPORT)
 
     settings = Settings(
-        vault_path=tmp_path / "vault", data_dir=tmp_path / "data", modules_path=modules
+        vault_path=tmp_path / "vault",
+        data_dir=tmp_path / "data",
+        modules_path=modules,
+        anthropic_api_key=None,
     )
     app = create_app(settings)
     async with app.router.lifespan_context(app):

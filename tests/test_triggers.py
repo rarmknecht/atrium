@@ -16,7 +16,12 @@ def _settings(tmp_path: Path) -> Settings:
     if not modules.exists():
         modules.mkdir()
         shutil.copytree(REPO_MODULES / "heartbeat", modules / "heartbeat")
-    return Settings(vault_path=tmp_path / "vault", data_dir=tmp_path / "data", modules_path=modules)
+    return Settings(
+        vault_path=tmp_path / "vault",
+        data_dir=tmp_path / "data",
+        modules_path=modules,
+        anthropic_api_key=None,
+    )
 
 
 @pytest.fixture

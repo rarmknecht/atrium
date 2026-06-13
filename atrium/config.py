@@ -7,7 +7,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Platform configuration, loaded from environment / .env."""
 
-    model_config = SettingsConfigDict(env_prefix="ATRIUM_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="ATRIUM_", env_file=".env", extra="ignore", populate_by_name=True
+    )
 
     vault_path: Path = Path("vault")
     modules_path: Path = Path("modules")

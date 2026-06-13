@@ -30,6 +30,7 @@ async def app_client(tmp_path, monkeypatch):
         modules_path=modules,
         embeddings_provider="off",
         watch_vault=False,
+        anthropic_api_key=None,  # hermetic: never use a real key from .env/env
     )
     app = create_app(settings)
     async with app.router.lifespan_context(app):

@@ -7,7 +7,9 @@ from atrium.config import Settings
 
 @pytest.fixture
 async def client(tmp_path):
-    settings = Settings(vault_path=tmp_path / "vault", data_dir=tmp_path / "data")
+    settings = Settings(
+        vault_path=tmp_path / "vault", data_dir=tmp_path / "data", anthropic_api_key=None
+    )
     app = create_app(settings)
     # ASGITransport does not run lifespan events — enter the lifespan manually
     async with app.router.lifespan_context(app):
