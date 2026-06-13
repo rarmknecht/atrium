@@ -1,0 +1,11 @@
+[module]
+id = "heartbeat"
+name = "Heartbeat"
+version = "0.1.0"
+description = "Exercises continuous/schedule/webhook triggers; can inject failures to test backoff"
+kind = "automation"
+timeout_seconds = 10
+
+[module.triggers]
+supported = ["continuous", "schedule", "webhook", "manual"]
+default = { type = "continuous", sleep_seconds = 300 }
