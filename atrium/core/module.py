@@ -98,6 +98,7 @@ class ModuleContext:
         trigger: TriggerInfo,
         db: aiosqlite.Connection,
         logger: logging.Logger,
+        librarian=None,
     ):
         self.module_id = module_id
         self.run_id = run_id
@@ -106,10 +107,13 @@ class ModuleContext:
         self.logger = logger
         self.report = Reporter(db, module_id, run_id)
         self.state = KVStore(db, module_id)
+        self._librarian = librarian
 
     @property
-    def librarian(self):  # noqa: ANN201 — LibrarianClient lands in Phase 3
-        raise NotImplementedError("The context layer arrives in Phase 3")
+    def librarian(self):  # noqa: ANN201 — ScopedLibrarian (avoids platform import cycle)
+        if self._librarian is None:
+            raise RuntimeError("context layer not available in this run")
+        return self._librarian
 
     @property
     def llm(self):  # noqa: ANN201 — LLMService lands in Phase 4

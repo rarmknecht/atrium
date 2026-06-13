@@ -3,11 +3,18 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+import os
+
 from atrium import __version__, db
+from atrium.api import context as context_api
 from atrium.api import hooks as hooks_api
 from atrium.api import modules as modules_api
 from atrium.api import triggers as triggers_api
 from atrium.config import Settings, get_settings
+from atrium.context.embeddings import get_provider
+from atrium.context.indexer import VaultIndexer
+from atrium.context.librarian import Librarian
+from atrium.context.vault import VaultStore
 from atrium.core.registry import ModuleRegistry
 from atrium.core.runner import ModuleRunner
 from atrium.core.triggers import TriggerEngine
@@ -25,9 +32,28 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.db = await db.connect(settings.db_path)
         app.state.schema_version = await db.migrate(app.state.db)
 
+        # context layer: vault -> indexer -> librarian
+        store = VaultStore(settings.vault_path)
+        embeddings = get_provider(settings.embeddings_provider, settings.embedding_model)
+        app.state.indexer = VaultIndexer(app.state.db, store, embeddings)
+        await app.state.indexer.full_scan()
+        if settings.watch_vault:
+            app.state.indexer.start_watcher()
+        app.state.librarian = Librarian(
+            app.state.db,
+            app.state.indexer,
+            embeddings,
+            router_model=settings.router_model,
+            anthropic_configured=bool(
+                settings.anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
+            ),
+        )
+
         app.state.registry = ModuleRegistry(settings.modules_path)
         app.state.registry.scan()
-        app.state.runner = ModuleRunner(app.state.db, app.state.registry)
+        app.state.runner = ModuleRunner(
+            app.state.db, app.state.registry, librarian=app.state.librarian
+        )
         app.state.triggers = TriggerEngine(app.state.db, app.state.registry, app.state.runner)
         await app.state.triggers.start()
 
@@ -39,6 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             yield
         finally:
+            await app.state.indexer.stop_watcher()
             await app.state.triggers.stop()
             await app.state.db.close()
 
@@ -46,6 +73,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(modules_api.router)
     app.include_router(triggers_api.router)
     app.include_router(hooks_api.router)
+    app.include_router(context_api.router)
 
     @app.get("/api/health")
     async def health() -> dict:

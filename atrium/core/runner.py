@@ -34,9 +34,10 @@ class ConfigError(ValueError):
 
 
 class ModuleRunner:
-    def __init__(self, db: aiosqlite.Connection, registry: ModuleRegistry):
+    def __init__(self, db: aiosqlite.Connection, registry: ModuleRegistry, librarian=None):
         self._db = db
         self._registry = registry
+        self._librarian = librarian  # context-layer Librarian; scoped per module run
         self._locks: dict[str, asyncio.Lock] = {}
 
     def _lock(self, module_id: str) -> asyncio.Lock:
@@ -128,6 +129,14 @@ class ModuleRunner:
         result: RunResult
         try:
             config = await self.load_config(record)
+            assert record.manifest is not None
+            librarian = None
+            if self._librarian is not None:
+                from atrium.context.librarian import ScopedLibrarian
+
+                librarian = ScopedLibrarian(
+                    self._librarian, record.id, record.manifest.context
+                )
             ctx = ModuleContext(
                 module_id=record.id,
                 run_id=run_id,
@@ -135,6 +144,7 @@ class ModuleRunner:
                 trigger=trigger,
                 db=self._db,
                 logger=run_logger,
+                librarian=librarian,
             )
             assert record.instance is not None
             module = record.instance

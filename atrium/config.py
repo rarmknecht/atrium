@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 8775
 
+    # Context layer
+    embeddings_provider: str = "fastembed"  # "fastembed" | "off"
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    router_model: str = "claude-opus-4-8"
+    watch_vault: bool = True
+
     # Read by the anthropic SDK directly via ANTHROPIC_API_KEY; tracked here only
     # so the UI can report whether it is configured.
     anthropic_api_key: str | None = None
