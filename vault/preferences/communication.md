@@ -8,7 +8,7 @@ type: preference
 
 # Communication preferences
 
-- Address me as Randy.
+- Address me as [YourName].
 - Lead with the conclusion; details after.
 - Prefer markdown tables for enumerable facts, prose for everything else.
 - Daily briefs should be skimmable in under a minute.
