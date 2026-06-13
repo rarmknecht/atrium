@@ -1,12 +1,14 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-import os
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from atrium import __version__, db
+from atrium.api.auth import BearerAuthMiddleware
 from atrium.api import context as context_api
 from atrium.api import hooks as hooks_api
 from atrium.api import meta as meta_api
@@ -35,6 +37,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.settings = settings
         app.state.db = await db.connect(settings.db_path)
         app.state.schema_version = await db.migrate(app.state.db)
+
+        # startup recovery: runs still marked 'running' belong to a previous
+        # process that died mid-run — there's no task behind them anymore.
+        cur = await app.state.db.execute(
+            """UPDATE runs SET status = 'interrupted',
+                   summary = COALESCE(NULLIF(summary, ''), 'interrupted by shutdown'),
+                   finished_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+               WHERE status = 'running'"""
+        )
+        await app.state.db.commit()
+        if cur.rowcount:
+            logger.info("startup recovery: marked %d orphaned run(s) interrupted", cur.rowcount)
 
         # context layer: vault -> indexer -> librarian
         store = VaultStore(settings.vault_path)
@@ -85,6 +99,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await app.state.db.close()
 
     app = FastAPI(title="Atrium", version=__version__, lifespan=lifespan)
+    if settings.auth_token:
+        app.add_middleware(BearerAuthMiddleware, token=settings.auth_token)
     if settings.cors_origins:
         app.add_middleware(
             CORSMiddleware,
@@ -108,6 +124,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "version": __version__,
             "schema_version": app.state.schema_version,
             "vault": str(settings.vault_path),
+            "auth_required": bool(settings.auth_token),
         }
+
+    # Serve the built React UI (web/dist) at the root with SPA fallback, so the
+    # whole platform runs from one origin in production. No-op if not built.
+    dist = settings.web_dist
+    if dist.is_dir():
+        assets = dist / "assets"
+        if assets.is_dir():
+            app.mount("/assets", StaticFiles(directory=assets), name="assets")
+        index = dist / "index.html"
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def spa(full_path: str):
+            candidate = (dist / full_path) if full_path else index
+            if candidate.is_file() and candidate != index:
+                return FileResponse(candidate)
+            return FileResponse(index)  # client-side routes -> app shell
+
+        logger.info("serving web UI from %s", dist)
 
     return app

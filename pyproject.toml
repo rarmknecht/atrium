@@ -19,6 +19,7 @@ dependencies = [
     "anthropic>=0.92",
     "numpy>=2.4.6",
     "fastembed>=0.8.0",
+    "mcp>=1.27.2",
 ]
 
 [project.scripts]

@@ -7,6 +7,8 @@ services:
       - "8775:8775"
     environment:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Set to require a token for the UI/API (webhooks keep their own tokens).
+      ATRIUM_AUTH_TOKEN: ${ATRIUM_AUTH_TOKEN:-}
     volumes:
       - ./vault:/data/vault
       - ./modules:/app/modules

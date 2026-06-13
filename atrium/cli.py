@@ -13,6 +13,8 @@ def main() -> None:
     serve.add_argument("--port", type=int, default=None)
     serve.add_argument("--reload", action="store_true", help="Dev auto-reload")
 
+    sub.add_parser("mcp", help="Expose the context vault to MCP clients over stdio")
+
     args = parser.parse_args()
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s — %(message)s"
@@ -29,6 +31,10 @@ def main() -> None:
             port=args.port or settings.port,
             reload=args.reload,
         )
+    elif args.command == "mcp":
+        from atrium.mcp_server import main as mcp_main
+
+        mcp_main()
 
 
 if __name__ == "__main__":

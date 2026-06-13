@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     # cross-origin calls too. Set to [] in production behind a single origin.
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
+    # Single-user auth. When set, /api/* (except health + webhook hooks) requires
+    # `Authorization: Bearer <token>`; the UI prompts for it. Empty = open (dev).
+    auth_token: str | None = None
+
+    # Built React UI (web/dist). When present, FastAPI serves it at the root with
+    # SPA fallback, so the whole platform runs from one origin/port in production.
+    web_dist: Path = Path("web/dist")
+
     # Unprefixed on purpose (the SDK convention); read from env or .env. The app
     # exports it to the process env at startup so the anthropic SDK finds it.
     anthropic_api_key: str | None = Field(default=None, validation_alias="ANTHROPIC_API_KEY")

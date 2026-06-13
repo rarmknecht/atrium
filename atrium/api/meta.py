@@ -1,5 +1,7 @@
 """Cross-cutting endpoints: global run feed, platform settings, live event stream."""
 
+import secrets
+
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
 router = APIRouter(tags=["meta"])
@@ -32,6 +34,10 @@ async def settings(request: Request) -> dict:
 
 @router.websocket("/ws")
 async def ws(websocket: WebSocket) -> None:
+    token = websocket.app.state.settings.auth_token
+    if token and not secrets.compare_digest(websocket.query_params.get("token", ""), token):
+        await websocket.close(code=4401)  # unauthorized
+        return
     await websocket.accept()
     hub = websocket.app.state.run_events
     queue = hub.subscribe()

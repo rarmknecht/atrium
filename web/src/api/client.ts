@@ -18,9 +18,20 @@ export class ApiError extends Error {
   }
 }
 
+const TOKEN_KEY = "atrium-token";
+export const auth = {
+  get: () => localStorage.getItem(TOKEN_KEY) ?? "",
+  set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
+  clear: () => localStorage.removeItem(TOKEN_KEY),
+};
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = auth.get();
   const res = await fetch(`/api${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...init,
   });
   if (!res.ok) {

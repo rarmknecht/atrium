@@ -4,6 +4,10 @@ Companion to [ARCHITECTURE.md](ARCHITECTURE.md). Phases are ordered so that **ev
 ends with something runnable and demonstrable**; later phases never require rework of
 earlier ones (contracts are defined up front).
 
+> **Status: all phases complete (0–6).** The POC is a working single-user platform —
+> module system, trigger engine, context layer, agent modules, React UI, auth, MCP, and
+> Docker packaging. 56 tests passing. See [BACKLOG.md](BACKLOG.md) for post-POC work.
+
 **POC definition of done:** two modules (one automation, one Claude-powered agent) running
 on real triggers, reading/writing a personal context vault through the librarian, with all
 management — config, triggers, context editing, reports — done through the React UI.

@@ -33,7 +33,9 @@ export function RunEventsProvider({ children }: { children: React.ReactNode }) {
     const connect = () => {
       if (stop) return;
       const proto = location.protocol === "https:" ? "wss" : "ws";
-      const ws = new WebSocket(`${proto}://${location.host}/ws`);
+      const token = localStorage.getItem("atrium-token");
+      const qs = token ? `?token=${encodeURIComponent(token)}` : "";
+      const ws = new WebSocket(`${proto}://${location.host}/ws${qs}`);
       wsRef.current = ws;
 
       ws.onopen = () => setConnected(true);
