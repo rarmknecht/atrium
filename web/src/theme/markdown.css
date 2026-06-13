@@ -1,0 +1,36 @@
+/* Rendered-markdown styling (reports, context docs, briefs). Token-driven. */
+.md { color: var(--text); font-size: var(--text-md); line-height: var(--leading-normal); }
+.md > *:first-child { margin-top: 0; }
+.md > *:last-child { margin-bottom: 0; }
+.md h1 { font-size: var(--text-xl); margin: var(--space-5) 0 var(--space-3); }
+.md h2 { font-size: var(--text-lg); margin: var(--space-5) 0 var(--space-2); }
+.md h3 { font-size: var(--text-md); margin: var(--space-4) 0 var(--space-2); }
+.md p { margin: 0 0 var(--space-3); }
+.md ul, .md ol { margin: 0 0 var(--space-3); padding-left: var(--space-5); }
+.md li { margin-bottom: var(--space-1); }
+.md a { color: var(--accent); }
+.md code {
+  background: var(--surface-hover);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85em;
+}
+.md pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  overflow-x: auto;
+}
+.md pre code { background: none; padding: 0; }
+.md blockquote {
+  border-left: 3px solid var(--border-strong);
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-4);
+  color: var(--text-muted);
+}
+.md table { border-collapse: collapse; margin: 0 0 var(--space-3); width: 100%; font-size: var(--text-sm); }
+.md th, .md td { border: 1px solid var(--border); padding: var(--space-2) var(--space-3); text-align: left; }
+.md th { background: var(--surface-hover); font-weight: var(--weight-semibold); }
+.md hr { border: none; border-top: 1px solid var(--border); margin: var(--space-4) 0; }
+.md em { color: var(--text-muted); }

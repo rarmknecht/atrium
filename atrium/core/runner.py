@@ -41,13 +41,19 @@ class ModuleRunner:
         librarian=None,
         llm_model: str = "claude-opus-4-8",
         anthropic_configured: bool = False,
+        events=None,
     ):
         self._db = db
         self._registry = registry
         self._librarian = librarian  # context-layer Librarian; scoped per module run
         self._llm_model = llm_model
         self._anthropic_configured = anthropic_configured
+        self._events = events  # RunEventHub | None
         self._locks: dict[str, asyncio.Lock] = {}
+
+    def _emit(self, event: dict) -> None:
+        if self._events is not None:
+            self._events.publish(event)
 
     def _lock(self, module_id: str) -> asyncio.Lock:
         return self._locks.setdefault(module_id, asyncio.Lock())
@@ -128,6 +134,12 @@ class ModuleRunner:
             (run_id, record.id, trigger.trigger_id, trigger.type),
         )
         await self._db.commit()
+        self._emit({
+            "type": "run.started",
+            "run_id": run_id,
+            "module_id": record.id,
+            "trigger_type": trigger.type,
+        })
 
         buffer = _BufferHandler()
         run_logger = logging.getLogger(f"atrium.module.{record.id}")
@@ -209,6 +221,17 @@ class ModuleRunner:
             ),
         )
         await self._db.commit()
+        self._emit({
+            "type": "run.finished",
+            "run_id": run_id,
+            "module_id": record.id,
+            "trigger_type": trigger.type,
+            "status": result.status,
+            "summary": result.summary,
+            "duration_ms": duration_ms,
+            "tokens_in": llm.usage.tokens_in,
+            "tokens_out": llm.usage.tokens_out,
+        })
         return run_id
 
     async def _record_skip(
@@ -233,5 +256,11 @@ class ModuleRunner:
         async with self._db.execute(
             "SELECT * FROM runs WHERE module_id = ? ORDER BY started_at DESC LIMIT ?",
             (module_id, limit),
+        ) as cur:
+            return [dict(row) for row in await cur.fetchall()]
+
+    async def list_recent_runs(self, limit: int = 50) -> list[dict]:
+        async with self._db.execute(
+            "SELECT * FROM runs ORDER BY started_at DESC LIMIT ?", (limit,)
         ) as cur:
             return [dict(row) for row in await cur.fetchall()]

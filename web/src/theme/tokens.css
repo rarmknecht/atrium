@@ -1,0 +1,148 @@
+/* =============================================================================
+ * ATRIUM DESIGN TOKENS — the single source of truth for look & feel.
+ *
+ * This is the file to edit when re-skinning Atrium (e.g. with Claude design).
+ * Components NEVER hardcode colors, spacing, or fonts — they only reference the
+ * semantic tokens defined here. Change a value here and the whole UI follows.
+ *
+ * Structure:
+ *   1. PRIMITIVES  — the raw palette + scales. Rename/repalette here.
+ *   2. SEMANTIC    — role-based tokens (bg, surface, text, accent, status…).
+ *                    Components use ONLY these. This is the main theming surface.
+ *   3. THEMES      — [data-theme="light"] overrides the semantic layer.
+ *
+ * Light is the override; dark is the default (set on <html data-theme>).
+ * ========================================================================== */
+
+:root {
+  /* -- 1. PRIMITIVES -------------------------------------------------------- */
+
+  /* Neutral ramp (dark-first) */
+  --gray-950: #0b0d10;
+  --gray-900: #121519;
+  --gray-850: #171b21;
+  --gray-800: #1d2229;
+  --gray-700: #2a313b;
+  --gray-600: #3a434f;
+  --gray-500: #5b6675;
+  --gray-400: #8a96a6;
+  --gray-300: #aeb8c6;
+  --gray-200: #cdd5e0;
+  --gray-100: #e7ecf2;
+  --gray-50:  #f4f7fa;
+  --white:    #ffffff;
+
+  /* Brand + status hues */
+  --accent-500: #4c8dff;
+  --accent-400: #6ba3ff;
+  --accent-600: #356fe0;
+  --green-500:  #3fb27f;
+  --amber-500:  #e0a23a;
+  --red-500:    #e0584f;
+  --violet-500: #8b7bdd;
+
+  /* Typography primitives */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --leading-tight: 1.25;
+  --leading-normal: 1.55;
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+
+  /* Radii */
+  --radius-sm: 5px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+
+  /* Motion */
+  --transition: 140ms ease;
+
+  /* Layout */
+  --sidebar-width: 232px;
+  --header-height: 56px;
+  --content-max: 1100px;
+
+  /* -- 2. SEMANTIC TOKENS (dark default) ----------------------------------- */
+
+  /* Surfaces */
+  --bg: var(--gray-950);
+  --surface: var(--gray-900);
+  --surface-raised: var(--gray-850);
+  --surface-hover: var(--gray-800);
+  --overlay: rgba(0, 0, 0, 0.55);
+
+  /* Text */
+  --text: var(--gray-100);
+  --text-muted: var(--gray-400);
+  --text-subtle: var(--gray-500);
+  --text-inverse: var(--gray-950);
+
+  /* Lines */
+  --border: var(--gray-700);
+  --border-strong: var(--gray-600);
+
+  /* Accent / interactive */
+  --accent: var(--accent-500);
+  --accent-hover: var(--accent-400);
+  --accent-active: var(--accent-600);
+  --accent-contrast: var(--white);
+  --focus-ring: color-mix(in srgb, var(--accent) 55%, transparent);
+
+  /* Status — foreground + subtle background pairs */
+  --ok: var(--green-500);
+  --ok-bg: color-mix(in srgb, var(--green-500) 16%, transparent);
+  --warn: var(--amber-500);
+  --warn-bg: color-mix(in srgb, var(--amber-500) 16%, transparent);
+  --error: var(--red-500);
+  --error-bg: color-mix(in srgb, var(--red-500) 16%, transparent);
+  --info: var(--accent-500);
+  --info-bg: color-mix(in srgb, var(--accent-500) 16%, transparent);
+  --running: var(--violet-500);
+  --running-bg: color-mix(in srgb, var(--violet-500) 18%, transparent);
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* -- 3. LIGHT THEME — overrides only the semantic layer --------------------- */
+
+[data-theme="light"] {
+  --bg: var(--gray-50);
+  --surface: var(--white);
+  --surface-raised: var(--white);
+  --surface-hover: var(--gray-100);
+  --overlay: rgba(15, 20, 30, 0.35);
+
+  --text: var(--gray-900);
+  --text-muted: var(--gray-500);
+  --text-subtle: var(--gray-400);
+  --text-inverse: var(--white);
+
+  --border: var(--gray-200);
+  --border-strong: var(--gray-300);
+
+  --accent-contrast: var(--white);
+
+  --shadow-sm: 0 1px 2px rgba(15, 20, 30, 0.08);
+  --shadow-md: 0 4px 16px rgba(15, 20, 30, 0.1);
+  --shadow-lg: 0 12px 40px rgba(15, 20, 30, 0.14);
+}

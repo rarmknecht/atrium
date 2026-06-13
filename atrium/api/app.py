@@ -2,12 +2,14 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 import os
 
 from atrium import __version__, db
 from atrium.api import context as context_api
 from atrium.api import hooks as hooks_api
+from atrium.api import meta as meta_api
 from atrium.api import modules as modules_api
 from atrium.api import reports as reports_api
 from atrium.api import triggers as triggers_api
@@ -16,6 +18,7 @@ from atrium.context.embeddings import get_provider
 from atrium.context.indexer import VaultIndexer
 from atrium.context.librarian import Librarian
 from atrium.context.vault import VaultStore
+from atrium.core.events import RunEventHub
 from atrium.core.registry import ModuleRegistry
 from atrium.core.runner import ModuleRunner
 from atrium.core.triggers import TriggerEngine
@@ -46,6 +49,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         anthropic_configured = bool(
             settings.anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
         )
+        app.state.anthropic_configured = anthropic_configured
+        app.state.run_events = RunEventHub()
         app.state.librarian = Librarian(
             app.state.db,
             app.state.indexer,
@@ -62,6 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             librarian=app.state.librarian,
             llm_model=settings.llm_model,
             anthropic_configured=anthropic_configured,
+            events=app.state.run_events,
         )
         app.state.triggers = TriggerEngine(app.state.db, app.state.registry, app.state.runner)
         await app.state.triggers.start()
@@ -79,11 +85,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await app.state.db.close()
 
     app = FastAPI(title="Atrium", version=__version__, lifespan=lifespan)
+    if settings.cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
     app.include_router(modules_api.router)
     app.include_router(triggers_api.router)
     app.include_router(hooks_api.router)
     app.include_router(context_api.router)
     app.include_router(reports_api.router)
+    app.include_router(meta_api.router)
 
     @app.get("/api/health")
     async def health() -> dict:
