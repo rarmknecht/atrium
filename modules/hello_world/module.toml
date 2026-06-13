@@ -1,0 +1,14 @@
+[module]
+id = "hello_world"
+name = "Hello World"
+version = "0.1.0"
+description = "Minimal reference module — logs a greeting, emits a report"
+kind = "automation"
+timeout_seconds = 30
+
+[module.triggers]
+supported = ["manual", "schedule", "continuous"]
+
+[module.context]
+read = []
+write = []

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="ATRIUM_", env_file=".env", extra="ignore")
 
     vault_path: Path = Path("vault")
+    modules_path: Path = Path("modules")
     data_dir: Path = Path("data")
     host: str = "127.0.0.1"
     port: int = 8775

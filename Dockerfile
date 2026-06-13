@@ -8,7 +8,8 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
-# Application
+# Application (README needed because pyproject declares it as package metadata)
+COPY README.md ./
 COPY atrium/ atrium/
 RUN uv sync --frozen --no-dev
 
