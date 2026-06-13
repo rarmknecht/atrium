@@ -1,0 +1,17 @@
+# Local-now, server-later: the same compose file targets the future always-on host.
+# Vault and modules are bind mounts (human-editable, git-tracked); SQLite state is a volume.
+services:
+  atrium:
+    build: .
+    ports:
+      - "8775:8775"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ./vault:/data/vault
+      - ./modules:/app/modules
+      - atrium-state:/data/state
+    restart: unless-stopped
+
+volumes:
+  atrium-state:

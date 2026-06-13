@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Platform state (operational DB lives outside git; the vault is IN git)
+data/
+
+# Env / secrets
+.env
+
+# Node (web/)
+node_modules/
+web/dist/
