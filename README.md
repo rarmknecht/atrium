@@ -1,15 +1,15 @@
 # Atrium
 
-A personal platform for custom agents and automations — modular by design, with a unified
-markdown-based context layer ("the Library + the Librarian") for personalization, and a
-React web management layer.
-
 > **Status: abandoned (September 2026).** Atrium reached a working proof of concept
 > (Phases 0–6: modules, triggers, context layer, agent modules, management UI, auth, and
 > packaging) and development stopped there. For my personal needs, user-level systemd
 > timers turned out to be a suitable and simpler replacement for what the trigger engine
 > and module system were doing. The code stays here as-is for reference. No further
 > development is planned.
+
+A personal platform for custom agents and automations — modular by design, with a unified
+markdown-based context layer ("the Library + the Librarian") for personalization, and a
+React web management layer.
 
 ## Quickstart
 
