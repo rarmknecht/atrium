@@ -1,6 +1,6 @@
 # Atrium
 
-> **Status: abandoned (September 2026).** Atrium reached a working proof of concept
+> **Status: retired (September 2026).** Atrium reached a working proof of concept
 > (Phases 0–6: modules, triggers, context layer, agent modules, management UI, auth, and
 > packaging) and development stopped there. For my personal needs, user-level systemd
 > timers turned out to be a suitable and simpler replacement for what the trigger engine
